@@ -1,0 +1,125 @@
+.product-title {
+    display: flex;
+    justify-content: center;
+    font-family: Inter;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 19.36px;
+    text-align: left;
+    font-size: 40px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .tab-button {
+    color: black;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    height: 50px;
+    width: 250px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  
+  .tab-button:hover {
+    background-color: black;
+    color: white;
+  }
+
+  .tab-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .product {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    text-align: center;
+  }
+  .product img {
+    width: 220px; /* Adjust width as needed */
+    height: 280px;
+    margin-bottom: 10px;
+  }
+
+  .add-to-cart{
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    height: 50px;
+    width: 250px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .aligned-eliments{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+
+  }
+
+  .product-info {
+    display: flex;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .vendor-name{
+    padding-left: 45%;
+  }
+
+  .product-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 1; /* Ensure it's above the image */
+}
+
+.price {
+    font-family: Khula;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 9.63px;
+    text-align: left;
+
+}
+
+.actual-prize{
+    padding-left: 20%;
+    font-family: Khula;
+    font-size: 20px;
+    color: #8F8F8F;
+    line-height: 9.63px;
+    text-align: left;
+
+}
+.offer-color{
+    color : #FF3737;
+    padding-left: 10%;
+    font-family: Khula;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 9.63px;
+    text-align: left;
+
+}
