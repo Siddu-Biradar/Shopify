@@ -1,0 +1,259 @@
+<ng-container class="card_container">
+  <kd-card *ngFor="let cardContent of cardContentData" class="cards" type="normal" href="" target="_self" rel="">
+      <div class="card_header">
+          <div style="color: #6D6D6D;" class="card_title">
+              <span>{{ cardContent.cardTitle }}</span>
+          </div>
+          <div id="cardValue" class="kd-type--headline-05">
+            <div *ngIf="dataLoading;else dataRender">
+              <kyn-skeleton class="loader_skeleton" overlay="true"></kyn-skeleton>
+            </div>
+            <ng-template #dataRender>
+              <span>{{ cardContent.cardValue }}</span>
+            </ng-template>
+          </div>
+      </div>
+  </kd-card>
+  <div class="card_below_line"></div>
+</ng-container>
+
+<ng-container class="service_developer_dropdowns">
+  <div class="dropdown_container">  
+      <kyn-dropdown
+      #technicalServiceDropdown
+      class="dropdown input_width"
+      id="technical_services_dropdown"
+      searchable="true"
+      size="md"
+      [placeholder]="'Select Technical Services'"
+      filterSearch="true"
+      multiple="true"
+      (on-change)="onTechnicalServiceDropdownChanges($event.detail.value)">
+      <span slot="label">{{ 'developmentMetrics.technicalService' | translate }}</span>
+      <ng-container *ngFor="let service of technicalServiceList">
+        <kyn-dropdown-option 
+          [value]="service.value">
+          {{ service.key }}
+        </kyn-dropdown-option>
+      </ng-container>
+      </kyn-dropdown>
+      <kyn-dropdown *ngIf="isAuthorised"
+        class="dropdown input_width"
+        id="developer_dropdown"
+        searchable="true"
+        size="md"
+        [placeholder]="'Select Developers'" 
+        filterSearch="true"
+        multiple="true"
+        [updateByValue]="true"
+        (on-change)="onDeveloperDropdownChanges($event)">
+        <span slot="label"> {{ 'developmentMetrics.developer' | translate }}</span>
+        <ng-container *ngFor="let developer of developerNamesList">
+          <kyn-dropdown-option [value]="developer.id">
+            {{ developer.name }}
+          </kyn-dropdown-option>
+        </ng-container>
+      </kyn-dropdown>
+  </div>
+</ng-container>
+<!-- Charts data -->
+
+<div class="ds--grid--full-width page-container new-page-container">
+  <div  class="cds--row margin-1rem">
+    <!-- commit frequency chart -->
+    <div class="cds--col-md-6 cds--col-sm-6 cds--col-lg-6">
+        <div class="kd-elevation--level-1" id="commit_frequency_chart">
+          <div class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon">
+            <div class="title-button-container">
+              <h4 class="kd-type--body-02 kd-type--weight-medium">
+                {{ 'developmentMetrics.commitFrequency'  | translate }}
+                <kyn-tooltip class="help-icon-tooltip" anchorPosition="center" direction="right" assistiveText="">
+                  <div slot="anchor">
+                    <kd-icon slot="anchor" [icon]="helpIcon"></kd-icon>
+                  </div>
+                  {{ 'developmentMetrics.commitHelpIcon' | translate }}
+                </kyn-tooltip>
+              </h4>
+              <div *ngIf="isAuthorised" class="chart_dropdown">
+                <kyn-dropdown class="commit_frequency_dropdowns" id="commit_frequency_dropdown" size="sm" name="overAllTestStatus" >
+                  <ng-container *ngFor="let item of chartTypes">
+                    <kyn-dropdown-option [value]="item.value" (on-click)="onChangeSelection($event)" [id]="item.id"
+                      [selected]="item.selected">
+                      {{ item.content | translate }}
+                    </kyn-dropdown-option>
+                  </ng-container>
+                </kyn-dropdown>
+              </div>
+              <kd-button
+                iconposition="center" 
+                kind="tertiary" 
+                type="button" 
+                size="small"
+                (on-click)="openCommitFrequencySidePanel($event)">
+                <kyn-tooltip anchorposition="center" direction="top" assistiveText="">
+                  <div class="button-content" slot="anchor">
+                    <span class="button-text">{{ 'developmentMetrics.viewDetails' | translate }}</span>
+                    <kd-icon class="button-icon" slot="icon" [icon]="arrowUpRight"></kd-icon>
+                  </div>
+                  {{ 'developmentMetrics.viewDetails' | translate }}
+                </kyn-tooltip>
+              </kd-button>
+            </div>
+          </div>
+          <div [ngSwitch]="selectedChartType">
+            <!-- Line Chart for selected developer -->
+            <ng-container *ngSwitchCase="'Line Chart'">
+              <kyn-loader-inline *ngIf="developerCommitsChartLoading | async; else commitChartContainer" status="active" class="spinner">
+                {{ 'loading' | translate }}
+              </kyn-loader-inline>
+              <ng-template #commitChartContainer>
+                <ng-container *ngIf="commitFrequencyDeveloperDataSets && commitFrequencyDeveloperDataSets.length > 0; else noDataFoundContainer">
+                  <div class="chart_container">
+                    <div class="commit_frequency_avg_commits">
+                      <div style="color: #6D6D6D;">{{ 'developmentMetrics.avgCommits' | translate }}</div>
+                      <div class="kd-type--headline-08" style="font-size: 20px;">{{ averageDeveloperCommitFrequency }}</div>
+                      <app-kd-line-chart *ngIf="commitFrequencyDeveloperDataSets && commitFrequencyDeveloperDataSets.length > 0; else noDataFoundContainer"
+                        class="commit_frequency_data"
+                        [cdata]="commitFrequencyDeveloperDataSets"
+                        [coptions]="developChartptions"
+                        [height]="365">
+                      </app-kd-line-chart>
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-template>
+            </ng-container>
+            <!-- Treemap for selected developer -->
+            <ng-container *ngSwitchCase="'Treemap'">
+              <kyn-loader-inline *ngIf="treemapDatasetsLoading | async; else commitChartContainer" status="active" class="spinner">
+                {{ 'loading' | translate }}
+              </kyn-loader-inline>
+              <ng-template #commitChartContainer>
+                <ng-container *ngIf="datasets && datasets[0].tree.length > 0; else noDataFoundContainer">
+                  <div class="chart_container">
+                    <div class="commit_frequency_avg_commits">
+                      <div style="color: #6D6D6D;">{{ 'developmentMetrics.avgCommits' | translate }}</div>
+                      <div class="kd-type--headline-08" style="font-size: 20px;">{{ averageDeveloperCommitFrequency }}</div>
+                      <kd-chart *ngIf="datasets && datasets.length > 0; else noDataFoundContainer"
+                        type="treemap"
+                        [datasets]="datasets"
+                        [options]="toptions"
+                        noBorder="true"
+                        hideCaptions="true"
+                        hideControls="true">
+                      </kd-chart>
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-template>
+            </ng-container>
+            <!-- Default chart selection -->
+            <ng-container *ngSwitchDefault>
+              <kyn-loader-inline *ngIf="commitsChartLoading | async; else commitChartContainer" status="active" class="spinner">
+                {{ 'loading' | translate }}
+              </kyn-loader-inline>
+              <ng-template #commitChartContainer>
+                <ng-container *ngIf="commitFrequencyDataSets && commitFrequencyDataSets.length > 0; else noDataFoundContainer">
+                  <div class="chart_container">
+                    <div class="commit_frequency_avg_commits">
+                      <div style="color: #6D6D6D;">{{ 'developmentMetrics.avgCommits' | translate }}</div>
+                      <div class="kd-type--headline-08" style="font-size: 20px;">{{ averageCommitFrequency }}</div>
+                      <app-kd-line-chart *ngIf="commitFrequencyDataSets && commitFrequencyDataSets.length > 0; else noDataFoundContainer"
+                        class="commit_frequency_data"
+                        [cdata]="commitFrequencyDataSets"
+                        [coptions]="options"
+                        [height]="365">
+                      </app-kd-line-chart>
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-template>
+            </ng-container>
+          </div>
+          <ng-template #noDataFoundContainer>
+            <div class="k-empty-state--pTop centered-content">
+              <app-empty-state [hasKDSEnabled]="true" [body]="noDataTitle" [subContent]="noDataSubTitle">
+              </app-empty-state>
+            </div>
+          </ng-template>
+        </div>
+    </div>
+    <!-- PR size chart -->
+    <div class="cds--col-md-6 cds--col-sm-6 cds--col-lg-6">
+        <div class="kd-elevation--level-1" id="pr_size_chart">
+            <div class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon">
+              <div class="title-button-container">
+                <h4 class="kd-type--body-02 kd-type--weight-medium">
+                  PR size
+                  <kyn-tooltip class="help-icon-tooltip" anchorPosition="center" direction="right" assistiveText="">
+                    <div slot="anchor">
+                      <kd-icon slot="anchor" [icon]="helpIcon"></kd-icon>
+                    </div>
+                    {{ 'abcd' | translate }}
+                  </kyn-tooltip>
+                </h4>
+                <kyn-dropdown
+                class="commit_frequency_dropdown"
+                id="commit_frequency_dropdown"
+                searchable="true"
+                size="sm"
+                filterSearch="true"
+                [hideTags] = "true"
+                multiple="true">
+                <ng-container *ngFor="let service of technicalService">
+                  <kyn-dropdown-option [value]="service">
+                    {{ service }}
+                  </kyn-dropdown-option>
+                </ng-container>
+              </kyn-dropdown>
+                <kd-button
+                  iconposition="center" 
+                  kind="tertiary" 
+                  type="button" 
+                  size="small"
+                  (on-click)="openPRsizeSidePanel($event)">
+                  <kyn-tooltip anchorposition="center" direction="top" assistiveText="">
+                    <div class="button-content" slot="anchor">
+                      <span class="button-text">View Details</span>
+                      <kd-icon class="button-icon" slot="icon" [icon]="arrowUpRight"></kd-icon>
+                    </div>
+                  viewDetails
+                  </kyn-tooltip>
+                </kd-button>
+              </div>
+            </div>
+            <div class="commit_frequency_avg_commit">
+              <div style="color: #6D6D6D;"> AVG PR  SIZE </div>
+              <div class="kd-type--headline-08" style="font-size: 20px;">3.5k lines</div>
+            </div>
+            <div class="pr_size_data">
+                <kd-chart type="line"
+                  hidedescription="true" 
+                  noborder="true"
+                  hideControls="true"
+                  height="330"
+                  [labels]="labels"
+                  [options]="prSizeChartptions">
+                </kd-chart>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+<!-- side panel table  -->
+<di-side-panel #sidePanel 
+  id="doraDetailSidePanel" 
+  class="side_panel" 
+  [title]="tableTitle"
+  [subTitle]="tableSubTitle"
+  (panelClosed)="onPanelClosed($event)">
+  <ng-container>
+      <app-commit-frequency-pr-size-details-dashboard *ngIf="onArrowClick"
+          [showCommitFrequencyTable]="showCommitFrequencyTable"
+          [showPRSizeTable]="showPRSizeTable"
+          [applications]="selectedApplications"
+          [selectedService]="selectedTechnicalService">
+      </app-commit-frequency-pr-size-details-dashboard>
+  </ng-container>
+</di-side-panel>
+
