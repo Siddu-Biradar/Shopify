@@ -1,0 +1,297 @@
+<div *ngIf="showCommitFrequencyTable" class="commit_frequency_pr_size_details">
+    <kyn-data-table  *ngIf="!showPRSizeTable"
+      id="commit_frequency_pr_details_table"
+      class="cursor-table"
+      [tableHeader] = "commitFrequencyDetailsTableFields"
+      [tableData]="commitFrequencyDetailsTableData"
+      [enableSorting]="true"
+      [noDataText]="'dataTable.noDataFound' | translate"
+      [noDataActionTitle]="'no'"
+      [externalSorting]="true"
+      [loading]="commitFrequencyDetailsTableLoading | async"
+      [hideSettings]="false"
+      [ascending]="ascending"
+      [activeFieldName]="activeFieldName"
+      [searchKey]="commitDetailSearchQuery"
+      [tagService]="true"
+      [tableId]="detailsTableTitle"
+      (search)="commitFrequencyDetailSearchQueryCheckSearch($event)"
+      (tableHeaderClicked)="commitFrequencyTableHeaderClicked($event)"
+      [totalRows]="detailTableTotal"
+      (pageSizeChange)="pageSizeChanged($event)"
+      [pageSize]="limit"
+      [templateList]="templateList"
+      [pageNumber]="pageNumber"
+      (pageNumberChange)="pageNumberChanged($event)">
+    </kyn-data-table>
+</div>
+
+  <ng-template #commitMessageTooltipTemplate let-cell="data.fullData">
+    <ng-container *ngIf="cell?.commitMessage else blankValue">
+      <kyn-tooltip class="commit_message" anchorposition="center" direction="right">
+        <div class="firstLine_commitmessage" slot="anchor"> {{ getFirstLine(cell.commitMessage) }} </div>
+        <div class="tooltip-content">
+          {{ cell.commitMessage }}
+        </div>
+      </kyn-tooltip>
+    </ng-container>
+    <ng-template #blankValue>
+      -
+    </ng-template>
+  </ng-template>
+
+<div *ngIf="showPRSizeTable" class="pr_size _details">
+  <kyn-data-table *ngIf="!showCommitFrequencyTable"
+    id="pr_size_details_table"
+    class="cursor-table"
+    [tableId]="prSizeTableId"
+    [loading]="pullRequestSizeDetailsTableLoading | async"
+    [tableHeader] = "PRsizeTableFields"
+    [tableData]="prSizeDetailsTableData"
+    [title]="PrDetailsTableTitle | translate"
+    [enableSorting]="true"
+    [noDataText]="'dataTable.noDataFound' | translate"
+    [noDataActionTitle]="'no'"
+    [externalSorting]="true"
+    [activeFieldName]="activeFieldName"
+    [hideSettings]="false"
+    [ascending]="prTableAscending"
+    [searchKey]="PRDetailsSearchQuery"
+    (search)="PRDetailSearchQueryCheckSearch($event)"
+    [tagService]="true"
+    [templateList]="templateList"
+    (tableHeaderClicked)="tableHeaderClicked($event)"
+    [totalRows]="prSizeDetailsTableTotal"
+    (pageSizeChange)="prPageSizeChanged($event)"
+    [pageSize]="PRLimit"
+    [pageNumber]="PRPageNumber"
+    (pageNumberChange)="prPageNumberChanged($event)">
+    <ng-container overflow-menu-toolbar>
+      <kyn-dropdown  class="commit_frequency_dropdown"  id="commit_frequency_dropdown" size="sm">
+        <ng-container *ngFor="let item of chartTypesForPrSize">
+          <kyn-dropdown-option (on-click)="onPrSizeDropdownChange($event)" [value]="item.value" [id]="item.id" [selected]="item.selected">
+            {{ item.value | translate }}
+          </kyn-dropdown-option>
+        </ng-container>
+      </kyn-dropdown>
+    </ng-container>
+  </kyn-data-table>
+</div>
+
+<ng-template #statusTagTemplate let-cell="data.fullData">
+  <ng-container *ngIf="cell?.prStatus else blankValue">
+    <ng-container [ngSwitch]="cell.prStatus">
+      <ng-container *ngSwitchCase="'open'">
+          <cds-icon-circle--filled>
+            <svg class="circle--filled" 
+                cdsIcon="circle--filled" 
+                ibmIconCircleFilled16 size="16">
+            </svg>
+        </cds-icon-circle--filled>
+        <span> {{ cell.prStatus }} </span>
+      </ng-container>
+      <ng-container *ngSwitchCase="'closed'">
+      <div class="icon_space">
+        <cds-icon-checkmark-filled>
+          <svg class="status status-success" 
+              cdsIcon="checkmark--filled" 
+              ibmIconCheckmarkFilled size="16">
+          </svg>
+       </cds-icon-checkmark-filled>
+       <span> {{ cell.prStatus }} </span>
+      </div>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+  <ng-template #blankValue>
+    -
+  </ng-template>
+</ng-template>
+
+<ng-template #linesChangedTemplate let-cell="data.fullData">
+    <ng-container *ngIf="cell?.changedfiles; else blankValue">
+      <div *ngIf="isLinesChanged">
+        <kyn-tag 
+          [label]="'Added: ' + cell.changedfiles.linesAdded" 
+          tagsize="md" 
+          shade="light" 
+          notruncation="true"
+          tagcolor="passed">
+          {{ cell.changedfiles.linesAdded }}
+        </kyn-tag>
+        <kyn-tag 
+          [label]="'Removed: ' + cell.changedfiles.linesDeleted" 
+          tagsize="md" 
+          shade="light" 
+          notruncation="true"
+          tagcolor="failed">
+          {{ cell.changedfiles.linesDeleted }}
+        </kyn-tag>
+      </div>
+      <div *ngIf="!isLinesChanged">
+        <kyn-tag 
+          [label]="'Files Changed: ' + cell.changedfiles.filesChanged" 
+          tagsize="md" 
+          shade="light" 
+          notruncation="true"
+          tagcolor="passed">
+          {{ cell.changedfiles.filesChanged }}
+        </kyn-tag>
+      </div>
+    </ng-container>
+    <ng-template #blankValue>
+      -
+    </ng-template>
+</ng-template>
+
+<div *ngIf="showCodeReviewVelocityTable" class="pr_size _details">
+  <kyn-data-table
+    id="code-review-velocity-table"
+    [tableId]="codeReviewTableId"
+    [loading]="codeRiviewVelocityDetailsTableLoading | async"
+    [tableHeader] = "codeRiviewVelocityTableFields"
+    [multiSelectColumnWidth]="nestedCodeRiviewVelocityTableFields"
+    [tableData]="codeRiviewVelocityTableData"
+    [title]="codeReviewDetailsTableTitle | translate"
+    [enableSorting]="true"
+    [striped]="true"
+    [expandable]="true"
+    [noDataText]="'dataTable.noDataFound' | translate"
+    [noDataActionTitle]="'no'"
+    [externalSorting]="true"
+    [activeFieldName]="activeFieldName"
+    [hideSettings]="false"
+    [ascending]="codeReviewTableAscending"
+    [searchKey]="codeReviewVelocityPRDetailsSearchQuery"
+    (search)="codeReviewDetailSearchQueryCheckSearch($event)"
+    (tableHeaderClicked)="codeReviewDetailTableHeaderClicked($event)"
+    [templateList]="templateList"
+    [tagService]="true"
+    [totalRows]="codeReviewDetailTableTotal"
+    (pageSizeChange)="codeReviewDetailPageSizeChanged($event)"
+    [pageSize]="codeReviewVelocityDetailLimit"
+    [pageNumber]="codeReviewDetailPageNumber"
+    (pageNumberChange)="codeReviewDetailPageNumberChanged($event)">
+  </kyn-data-table>
+</div>
+
+<ng-template #expandTemplate let-data="data" let-index="index" let-isExpanded="isExpanded">
+  <kyn-data-table
+    id="code_review_velocity_nested_table"
+    [hideSettings]="true"
+    [showTableSeacrhFilter]="false"
+    [tableHeader] = "data.fields"
+    [templateList]="templateList"
+    [tableData]="data.data">
+  </kyn-data-table> 
+</ng-template>
+
+<ng-template #commentsDuringReviewTemplate let-data="data">
+  <ul>
+    <li *ngFor="let comment of data.fullData.commentsDuringReview" class="comment-bullet">
+      {{ comment ? comment : '' }}
+    </li>
+  </ul>
+</ng-template>
+
+<div *ngIf="PRTimeToMergeTable" class="pr_time_to_merge_table">
+  <kyn-data-table
+    id="pr_time_to_merge_table"
+    [tableId]="PRTimeToMergeTableId"
+    [loading]="pullRequestTimeToMergeDetailsTableLoading | async"
+    [tableHeader] = "PRTimeToMergeTableFields"
+    [tableData]="PRTimeToMergeDetailsTableData"
+    [enableSorting]="true"
+    [noDataText]="'dataTable.noDataFound' | translate"
+    [noDataActionTitle]="'no'"
+    [externalSorting]="true"
+    [hideSettings]="false"
+    [ascending]="prTimeToMergeTableAscending"
+    [searchKey]="PRTimeToMergeDetailsSearchQuery"
+    (search)="PRTimeToMergeDetailSearchQueryCheckSearch($event)"
+    [tagService]="true"
+    (tableHeaderClicked)="PRTimeToMergeTableHeaderClicked($event)"
+    [totalRows]="PRTimeToMergeDetailsTableTotal"
+    (pageSizeChange)="PRTimeToMergePageSizeChanged($event)"
+    [pageSize]="PRTimeToMergeLimit"
+    [pageNumber]="PRTimeToMergePageNumber"
+    [templateList]="templateList"
+    (pageNumberChange)="PRTimeToMergePageNumberChanged($event)">
+  </kyn-data-table>
+</div>
+
+  <ng-template #linesChangedTemplateForPTM let-cell="data.fullData">
+    <ng-container *ngIf="cell?.noOfLinesAndFilesChanged; else blankValue">
+        <kyn-tag 
+          [label]="'Added: ' + cell.noOfLinesAndFilesChanged.linesAdded" 
+          tagsize="md" 
+          shade="light" 
+          notruncation="true"
+          tagcolor="passed">
+          {{ cell.noOfLinesAndFilesChanged.linesAdded }}
+        </kyn-tag>
+        <kyn-tag 
+          [label]="'Removed: ' + cell.noOfLinesAndFilesChanged.linesDeleted" 
+          tagsize="md" 
+          shade="light" 
+          notruncation="true"
+          tagcolor="failed">
+          {{ cell.noOfLinesAndFilesChanged.linesDeleted }}
+        </kyn-tag>
+    </ng-container>
+  </ng-template>
+
+  <ng-template #FilesChangedTemplateForPTM let-cell="data.fullData">
+    <ng-container *ngIf="cell?.noOfOnlyFilesChange; else blankValue">
+      <kyn-tag 
+        [label]="'Files Changed: ' + cell.noOfOnlyFilesChange.filesChanged" 
+        tagsize="md" 
+        shade="light" 
+        notruncation="true"
+        tagcolor="passed">
+        {{ cell.noOfOnlyFilesChange.filesChanged }}
+      </kyn-tag>
+    </ng-container>
+  </ng-template>
+
+  <ng-template #blankValue>
+    -
+  </ng-template>
+
+  <div *ngIf="codeReviewEfficiencyTable" class="code-review-efficiency">
+    <kyn-data-table
+      id="code-review-efficiency-table"
+      [tableId]="codeReviewEfficiencyTableId"
+      [loading]="codeReviewEfficiencyDetailsTableLoading | async"
+      [tableHeader] = "codeReviewEfficiencyTableFields"
+      [multiSelectColumnWidth]="nestedCodeReviewEfficiencyTableFields"
+      [tableData]="codeReviewEfficiencyTableData"
+      [enableSorting]="true"
+      [striped]="true"
+      [expandable]="true"
+      [noDataText]="'dataTable.noDataFound' | translate"
+      [noDataActionTitle]="'no'"
+      [externalSorting]="true"
+      [hideSettings]="false"
+      [ascending]="codeReviewEfficiencyTableAscending"
+      [searchKey]="codeReviewEfficiencyPRDetailsSearchQuery"
+      (search)="codeReviewEfficiencyDetailSearchQueryCheckSearch($event)"
+      (tableHeaderClicked)="codeReviewEfficiencyDetailTableHeaderClicked($event)"
+      [templateList]="templateList"
+      [tagService]="true"
+      [totalRows]="codeReviewEfficiencyDetailTableTotal"
+      (pageSizeChange)="codeReviewEfficiencyDetailPageSizeChanged($event)"
+      [pageSize]="codeReviewEfficiencyDetailLimit"
+      [pageNumber]="codeReviewEfficiencyDetailPageNumber"
+      (pageNumberChange)="codeReviewEfficiencyDetailPageNumberChanged($event)">
+    </kyn-data-table>
+  </div>
+  
+  <ng-template #expandTemplate let-data="data" let-index="index" let-isExpanded="isExpanded">
+    <kyn-data-table
+      [hideSettings]="true"
+      [showTableSeacrhFilter]="false"
+      [tableHeader] = "data.fields"
+      [tableData]="data.data">
+    </kyn-data-table> 
+  </ng-template>
