@@ -1,0 +1,974 @@
+<ng-container class="card_container">
+  <div class="allcards">
+  <kd-card
+    *ngFor="let cardContent of cardContentData"
+    class="cards"
+    type="normal"
+    href=""
+    target="_self"
+    rel=""
+  >
+    <div class="card_header">
+      <div style="color: #6d6d6d" class="card_title">
+        <span>{{ cardContent.cardTitle }}</span>
+      </div>
+      <div id="cardValue" class="kd-type--headline-05" style="height: 1.5rem;">
+        <div *ngIf="dataLoading; else dataRender">
+          <kyn-skeleton class="loader_skeleton" overlay="true"></kyn-skeleton>
+        </div>
+        <ng-template #dataRender>
+          <span>{{ cardContent.cardValue }}</span>
+        </ng-template>
+      </div>
+    </div>
+  </kd-card>
+</div>
+  <div class="card_below_line"></div>
+</ng-container>
+
+<div class="cds--grid--full-width page-container new-page-container">
+  <div class="cds--row margin-1rem">
+    <!-- PR time to merge -->
+    <div class="cds--col-md-12 cds--col-sm-12 cds--col-lg-12">
+      <div class="kd-elevation--level-1">
+        <!-- Header with title, dropdown, and button -->
+        <div
+          class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon"
+        >
+          <div class="title-button-container">
+            <h4 class="kd-type--body-02 kd-type--weight-medium">
+              {{ "developmentMetrics.prTimeToMerge" | translate }}
+              <kyn-tooltip
+                class="help-icon-tooltip"
+                anchorPosition="center"
+                direction="right"
+                assistiveText=""
+              >
+                <div slot="anchor">
+                  <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
+                </div>
+                {{ "developmentMetrics.ttmHelpIcon" | translate }}
+              </kyn-tooltip>
+            </h4>
+            <kyn-dropdown class="ttm_dropdown" size="sm">
+              <ng-container *ngFor="let item of timeToMergeChartTypes">
+                <kyn-dropdown-option
+                  [value]="item.value"
+                  [id]="item.id"
+                  (on-click)="onChangeSelectionForPTTM($event)"
+                  [selected]="item.selected"
+                >
+                  {{ item.value | translate }}
+                </kyn-dropdown-option>
+              </ng-container>
+            </kyn-dropdown>
+            <kd-button
+              *ngIf="showPRTimeToMergeViewDetailsIcon"
+              iconposition="center"
+              kind="tertiary"
+              type="button"
+              size="small"
+              (on-click)="openPullRequestTimeToMergeSidePanel()"
+            >
+              <kyn-tooltip
+                anchorposition="center"
+                direction="top"
+              >
+                <div class="button-content" slot="anchor">
+                  <kd-icon
+                    class="button-icon"
+                    slot="icon"
+                    [icon]="arrowUpRight"
+                  ></kd-icon>
+                </div>
+                {{ "developmentMetrics.viewDetails" | translate }}
+              </kyn-tooltip>
+            </kd-button>
+          </div>
+        </div>
+
+        <!-- PR time-to-merge chart-->
+         <!-- Duration chart -->
+        <div *ngIf="prTTMSelectedChartType === 'Duration'">
+          <div
+            class="time-to-merge-chart"
+            *ngIf="selectedDeveloper.length === 0; else developerTimeToMergeChart">
+            <kyn-loader-inline
+              *ngIf="
+                PttmChartDataLoading$  | async ;
+                else prTimeToMergeChartContainer
+              "
+              status="active"
+              class="spinner"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+            <ng-template #prTimeToMergeChartContainer>
+              <ng-container
+                *ngIf="
+                  prTimeToMergeChartDataSets &&
+                    prTimeToMergeChartDataSets.length > 0;
+                  else noDataFoundContainer
+                "
+              >
+                <div class="chart-container">
+                  <div class="commit_frequency_avg_commits">
+                    <div style="color: #6d6d6d">
+                      {{ "developmentMetrics.avgTimeToMergePR" | translate }}
+                    </div>
+                    <div class="kd-type--headline-08" style="font-size: 20px">
+                      {{ avgTimeTakenToMergePR }}
+                    </div>
+                    <app-kd-line-chart
+                      [type]="'combo'"
+                      [cdata]="prTimeToMergeChartDataSets"
+                      [coptions]="prTimeToMergeChartOptions"
+                      [lcolors]="chartColorsForPRTime"
+                      [height]="365"
+                    >
+                    </app-kd-line-chart>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </div>
+          <ng-template #developerTimeToMergeChart>
+            <kyn-loader-inline
+              *ngIf="
+                ttmChartDataLoading$ | async;
+                else prTimeToMergeChartContainerDeveloperLevel
+              "
+              status="active"
+              class="spinner"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+            <ng-template #prTimeToMergeChartContainerDeveloperLevel>
+              <ng-container
+                *ngIf="
+                  prTimeToMergeChartDataSetsForDeveloper &&
+                    prTimeToMergeChartDataSetsForDeveloper.length > 0;
+                  else noDataFoundContainer
+                "
+              >
+                <div class="chart-container">
+                  <div class="commit_frequency_avg_commits">
+                    <div style="color: #6d6d6d">
+                      {{ "developmentMetrics.avgTimeToMergePR" | translate }}
+                    </div>
+                    <div class="kd-type--headline-08" style="font-size: 20px">
+                      {{ avgTimeTakenToMergePR }}
+                    </div>
+                    <app-kd-line-chart
+                      [type]="'combo'"
+                      [cdata]="prTimeToMergeChartDataSetsForDeveloper"
+                      [coptions]="prTimeToMergeForDeveloperChartOptions"
+                      [lcolors]="chartColorsForDeveloperForTTM"
+                      [height]="365"
+                    >
+                    </app-kd-line-chart>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ng-template>
+          <ng-template #noDataFoundContainer>
+            <div class="k-empty-state--pTop">
+              <app-empty-state 
+                class="empty_state"
+                [hasKDSEnabled]="true" 
+                [body]="noDataTitle" 
+                [subContent]="noDataSubTitle">
+              </app-empty-state>
+            </div>
+          </ng-template>
+        </div>
+
+        <div *ngIf="(prTTMSelectedChartType === 'Lines changed' || prTTMSelectedChartType === 'Files modified') &&  selectedDeveloper.length === 0">
+          <kyn-loader-inline
+            status="active"
+            class="spinner"
+            *ngIf="isAppLevelFilesAndLinesChangedDataLoading; else barcharts"
+          >
+            {{ "loading" | translate }}
+          </kyn-loader-inline>
+
+          <ng-template #barcharts>
+            <div class="commit_frequency_avg_commits">
+              <div style="color: #6d6d6d">
+                {{ "developmentMetrics.avgTimeToMergePR" | translate }}
+              </div>
+              <div class="kd-type--headline-08" style="font-size: 20px">
+                {{ avgTimeTakenToMergePR }}
+              </div>
+                <app-kd-bar-chart
+                  #barcharts
+                  [id]="'lines-files-scan-bar-chart'"
+                  *ngIf="
+                    maxmValuedTimeToMergeDataSetsForApplication.length > 0;
+                    else noDataFound
+                  "
+                  [cdata]="timeToMergeDataSetsForApplicationLineAndFiles"
+                  [options]="appLevelBarChartOptions"
+                  [height]="365"
+                  [barThickness]="true"
+                >
+                </app-kd-bar-chart>
+            </div>
+          </ng-template>
+        </div>
+
+         <div *ngIf="(prTTMSelectedChartType === 'Lines changed' || prTTMSelectedChartType === 'Files modified') &&  selectedDeveloper.length > 0">
+          <kyn-loader-inline
+            status="active"
+            class="spinner"
+            *ngIf="isDeveloperLevelFilesAndLinesChangedDataLoading; else developerBarcharts">
+            {{ "loading" | translate }}
+          </kyn-loader-inline>
+
+          <ng-template #developerBarcharts>
+            <div class="commit_frequency_avg_commits">
+              <div style="color: #6d6d6d">
+                {{ "developmentMetrics.avgTimeToMergePR" | translate }}
+              </div>
+              <div class="kd-type--headline-08" style="font-size: 20px">
+                {{ avgTimeTakenToMergePR }}
+              </div>
+                <app-kd-bar-chart
+                  *ngIf="
+                  timeToMergeDataSetsForDeveloperLineAndFiles.length > 0;
+                    else noDataFound
+                  "
+                  [id]="'lines-files-scan-bar-chart'"
+                  [cdata]="timeToMergeDataSetsForDeveloperLineAndFiles"
+                  [options]="appLevelBarChartOptions"
+                  [height]="365"
+                  [barThickness]="true"
+                >
+                </app-kd-bar-chart>
+            </div>
+          </ng-template>
+
+        <ng-template #noDataFound>
+          <div class="k-empty-state--pTop">
+            <app-empty-state 
+              class="empty_state"
+              [hasKDSEnabled]="true" 
+              [body]="noDataTitle" 
+              [subContent]="noDataSubTitle">
+            </app-empty-state>
+          </div>
+        </ng-template>
+
+          </div>
+
+          <ng-template #noDataFound>
+            <div class="k-empty-state--pTop">
+              <app-empty-state
+                class="empty_state"
+                [hasKDSEnabled]="true"
+                [body]="noDataTitle"
+                [subContent]="noDataSubTitle"
+              >
+              </app-empty-state>
+            </div>
+          </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <div class="cds--row margin-1rem">
+    <!-- Code Review Velocity -->
+    <div class="cds--col-md-6 cds--col-sm-6 cds--col-lg-6 pt-2">
+      <div class="kd-elevation--level-1" id="code_review_velocity">
+        <div
+          class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon"
+        >
+          <div class="title-button-container">
+            <h4 class="kd-type--body-02 kd-type--weight-medium">
+              {{ "developmentMetrics.codeReviewVelocity" | translate }}
+              <kyn-tooltip
+                class="help-icon-tooltip"
+                anchorPosition="center"
+                direction="right"
+                assistiveText=""
+              >
+                <div slot="anchor">
+                  <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
+                </div>
+                {{
+                  "developmentMetrics.codeReviewVelocityHelpIcon" | translate
+                }}
+              </kyn-tooltip>
+            </h4>
+            <kd-button
+              *ngIf="showCodeReviewVelocityViewDetailsIcon"
+              iconposition="center"
+              kind="tertiary"
+              type="button"
+              size="small"
+              (on-click)="openCodeReviewVelocitySidePanel()"
+            >
+              <kyn-tooltip
+                anchorposition="center"
+                direction="top"
+              >
+                <div class="button-content" slot="anchor">
+                  <kd-icon
+                    class="button-icon"
+                    slot="icon"
+                    [icon]="arrowUpRight"
+                  ></kd-icon>
+                </div>
+                {{ "developmentMetrics.viewDetails" | translate }}
+              </kyn-tooltip>
+            </kd-button>
+          </div>
+        </div>
+        <div
+          class="applicationPrSizeChart"
+          *ngIf="
+            selectedDeveloper.length === 0;
+            else developerCodeReviewVelocityChart
+          "
+        >
+          <div class="inner_chart_container">
+            <kyn-loader-inline
+              *ngIf="
+                applicationCodeReviewVelocity$ | async;
+                else applicationLevelCRVChartContainer
+              "
+              status="active"
+              class="spinner_class"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+          </div>
+          <ng-template #applicationLevelCRVChartContainer>
+            <ng-container
+              *ngIf="
+                codeReviewVelocityDataSets &&
+                  codeReviewVelocityDataSets.length > 0;
+                else noDataFoundContainer
+              "
+            >
+              <div class="chart_container">
+                <div class="commit_frequency_avg_commits">
+                  <div class="metrics_container">
+                    <div class="metric_item">
+                      <div class="metric_label">
+                        {{
+                          "developmentMetrics.avgCodeReviewsPerHour" | translate
+                        }}
+                      </div>
+                      <div class="metric_value">
+                        {{ avgCodeReviewsPerHour }}
+                      </div>
+                    </div>
+                    <div class="metric_item left">
+                      <div class="metric_label">
+                        {{
+                          "developmentMetrics.avgTimeToFirstResponse"
+                            | translate
+                        }}
+                      </div>
+                      <div class="metric_value">
+                        {{ avgTimeToFirstResponse }}
+                      </div>
+                    </div>
+                  </div>
+                  <app-kd-line-chart
+                    *ngIf="
+                      codeReviewVelocityDataSets &&
+                        codeReviewVelocityDataSets.length > 0;
+                      else noDataFoundContainer
+                    "
+                    [type]="'combo'"
+                    [cdata]="codeReviewVelocityDataSets"
+                    [coptions]="codeReviewSizeChartOptions"
+                    [lcolors]="codeReviewVelocityColors"
+                    [height]="365"
+                  >
+                  </app-kd-line-chart>
+                </div>
+              </div>
+            </ng-container>
+          </ng-template>
+        </div>
+
+        <ng-template #developerCodeReviewVelocityChart>
+          <div class="inner_chart_container">
+            <kyn-loader-inline
+              *ngIf="
+                developerCodeReviewVelocityDataLoading$ | async;
+                else individualLevelChartContainer
+              "
+              status="active"
+              class="spinner_class"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+          </div>
+          <ng-template #individualLevelChartContainer>
+            <ng-container
+              *ngIf="
+                codeReviewVelocityDataSetsForDeveloper &&
+                  codeReviewVelocityDataSetsForDeveloper.length > 0;
+                else noDataFoundContainer
+              ">
+              <div class="chart_container">
+                <div class="commit_frequency_avg_commits">
+                  <div class="metrics_container">
+                    <div class="metric_item">
+                      <div class="metric_label">
+                        {{
+                          "developmentMetrics.avgCodeReviewsPerHour" | translate
+                        }}
+                      </div>
+                      <div class="metric_value">
+                        {{ avgCodeReviewsPerHour }}
+                      </div>
+                    </div>
+                    <div class="metric_item left">
+                      <div class="metric_label">
+                        {{
+                          "developmentMetrics.avgTimeToFirstResponse"
+                            | translate
+                        }}
+                      </div>
+                      <div class="metric_value">
+                        {{ avgTimeToFirstResponse }}
+                      </div>
+                    </div>
+                  </div>
+                  <app-kd-line-chart
+                    *ngIf="
+                      codeReviewVelocityDataSetsForDeveloper &&
+                        codeReviewVelocityDataSetsForDeveloper.length > 0;
+                      else noDataFoundContainer
+                    "
+                    [type]="'combo'"
+                    [cdata]="codeReviewVelocityDataSetsForDeveloper"
+                    [coptions]="codeReviewSizeChartOptions"
+                    [lcolors]="chartColorsForDeveloperCodeReviewVelocity"
+                    [height]="365"
+                  >
+                  </app-kd-line-chart>
+                </div>
+              </div>
+            </ng-container>
+          </ng-template>
+        </ng-template>
+        <ng-template #noDataFoundContainer>
+          <div class="k-empty-state--pTop">
+            <app-empty-state
+              class="empty_state"
+              [hasKDSEnabled]="true"
+              [body]="noDataTitle"
+              [subContent]="noDataSubTitle"
+            >
+            </app-empty-state>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    <!-- Code review efficiency -->
+    <div class="cds--col-md-6 cds--col-sm-6 cds--col-lg-6 pt-2">
+      <div class="kd-elevation--level-1" id="code_review_efficiency">
+        <div class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon">
+          <div class="title-button-container">
+            <h4 class="kd-type--body-02 kd-type--weight-medium">
+              {{ "developmentMetrics.codeReviewEfficiency" | translate }}
+              <kyn-tooltip class="help-icon-tooltip" anchorPosition="center" direction="right" assistiveText="">
+                <div slot="anchor">
+                  <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
+                </div>
+                {{ "developmentMetrics.codeReviewEfficiencyHelpIcon" | translate }}
+              </kyn-tooltip>
+            </h4>
+            <kd-button iconposition="center" kind="tertiary" type="button" size="small" 
+              *ngIf="showCodeReviewEfficiencyViewDetailsIcon"
+             (on-click)="openCodeReviewEfficiencySidePanel()">
+              <kyn-tooltip anchorposition="center" direction="top">
+                <div class="button-content" slot="anchor">
+                  <kd-icon class="button-icon" slot="icon" [icon]="arrowUpRight"></kd-icon>
+                </div>
+                {{ "developmentMetrics.viewDetails" | translate }}
+              </kyn-tooltip>
+            </kd-button>
+          </div>
+        </div>
+
+        <div class="chart-container-efficiency top-left-aligned">
+          <div class="chart" *ngIf="selectedDeveloper.length === 0; else developerCodeReviewEfficiencyChart">
+            <div class="inner_chart_container">
+              <kyn-loader-inline *ngIf="codeReviewEfficiencyAppLevelChartLoading$ | async; else applicationLevelCREChartContainer" status="active" class="spinner_class">
+                {{ "loading" | translate }}
+              </kyn-loader-inline>
+            </div>
+        
+            <ng-template #applicationLevelCREChartContainer>
+              <div class="chart_content" *ngIf="appCodeReviewEfficiencyData.length;else noDataFoundChartContainer">
+                <div class="metrics-text">{{ "developmentMetrics.avgReviewEfficiency" | translate }}</div>
+                <div class="metrics-value">{{ averageCodeReviewEfficiency }}</div>
+                <app-kd-line-chart
+                  [type]="'combo'"
+                  [cdata]="appCodeReviewEfficiencyData"
+                  [coptions]="codeReviewEfficiencyChartOptions"
+                  [lcolors]="appCodeReviewEfficiencyChartColors"
+                  [height]="365"
+                ></app-kd-line-chart>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <ng-template #developerCodeReviewEfficiencyChart>
+        <div class="inner_chart_container">
+          <kyn-loader-inline *ngIf="codeReviewEfficiencyDeveloperLevelChartLoading$ | async; else devLevelCREChartContainer" status="active" class="spinner_class">
+            {{ "loading" | translate }}
+          </kyn-loader-inline>
+        </div>
+    
+        <ng-template #devLevelCREChartContainer>
+          <div class="chart_content" *ngIf="developerLevelCodeReviewEfficiencyDataset.length;else noDataFoundChartContainer">
+            <div class="metrics-text">{{ "developmentMetrics.avgReviewEfficiency" | translate }}</div>
+            <div class="metrics-value">{{ averageCodeReviewEfficiency }}</div>
+            <app-kd-line-chart
+              [type]="'combo'"
+              [cdata]="developerLevelCodeReviewEfficiencyDataset"
+              [coptions]="codeReviewEfficiencyChartOptions"
+              [lcolors]="codeReviewEfficiencyDeveloperChartColors"
+              [height]="365"
+            ></app-kd-line-chart>
+          </div>
+        </ng-template>
+        </ng-template>
+
+        <ng-template #noDataFoundChartContainer>
+          <div class="k-empty-state--pTop">
+            <app-empty-state
+              [hasKDSEnabled]="true"
+              [body]="noDataTitle"
+              [subContent]="noDataSubTitle"
+            >
+            </app-empty-state>
+          </div>
+        </ng-template>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cds--row margin-1rem">
+    <!-- Commit frequency chart -->
+    <div class="cds--col-md-6 cds--col-sm-6 cds--col-lg-6">
+      <div class="kd-elevation--level-1" id="commit_frequency_chart">
+        <div
+          class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon"
+        >
+          <div class="title-button-container">
+            <h4 class="kd-type--body-02 kd-type--weight-medium">
+              {{ "developmentMetrics.commitFrequency" | translate }}
+              <kyn-tooltip
+                class="help-icon-tooltip"
+                anchorPosition="center"
+                direction="right"
+                assistiveText=""
+              >
+                <div slot="anchor">
+                  <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
+                </div>
+                {{ "developmentMetrics.commitHelpIcon" | translate }}
+              </kyn-tooltip>
+            </h4>
+            <div *ngIf="selectedDeveloper.length > 0" class="chart_dropdown">
+              <kyn-dropdown
+                class="commit_frequency_dropdowns"
+                id="commit_frequency_dropdown"
+                size="sm"
+              >
+                <ng-container *ngFor="let item of chartTypes">
+                  <kyn-dropdown-option
+                    [value]="item.value"
+                    (on-click)="onChangeSelection($event)"
+                    [id]="item.id"
+                    [selected]="item.selected"
+                  >
+                    {{ item.content | translate }}
+                  </kyn-dropdown-option>
+                </ng-container>
+              </kyn-dropdown>
+            </div>
+            <kd-button
+              *ngIf="showCommitFrequencyViewDetailsIcon"
+              iconposition="center"
+              kind="tertiary"
+              type="button"
+              size="small"
+              (on-click)="openCommitFrequencySidePanel($event)"
+            >
+              <kyn-tooltip
+                anchorposition="center"
+                direction="top"
+                assistiveText=""
+              >
+                <div class="button-content" slot="anchor">
+                  <kd-icon
+                    class="button-icon"
+                    slot="icon"
+                    [icon]="arrowUpRight"
+                  ></kd-icon>
+                </div>
+                {{ "developmentMetrics.viewDetails" | translate }}
+              </kyn-tooltip>
+            </kd-button>
+          </div>
+        </div>
+        <div [ngSwitch]="selectedChartType">
+          <!-- Line Chart for selected developer -->
+          <ng-container *ngSwitchCase="'Line Chart'">
+            <div class="chart">
+              <kyn-loader-inline
+                *ngIf="
+                  developerCommitsChartLoading | async;
+                  else commitChartContainer
+                "
+                status="active"
+                class="spinner"
+              >
+                {{ "loading" | translate }}
+              </kyn-loader-inline>
+            </div>
+            <ng-template #commitChartContainer>
+              <ng-container
+                *ngIf="
+                  commitFrequencyDeveloperDataSets &&
+                    commitFrequencyDeveloperDataSets.length > 0;
+                  else noDataFoundContainer
+                "
+              >
+                <div class="chart_container">
+                  <div class="commit_frequency_avg_commits">
+                    <div style="color: #6d6d6d">
+                      {{ "developmentMetrics.avgCommits" | translate }}
+                    </div>
+                    <div class="kd-type--headline-08" style="font-size: 20px">
+                      {{ averageDeveloperCommitFrequency }}
+                    </div>
+                    <app-kd-line-chart
+                      *ngIf="
+                        commitFrequencyDeveloperDataSets &&
+                          commitFrequencyDeveloperDataSets.length > 0;
+                        else noDataFoundContainer
+                      "
+                      class="commit_frequency_data"
+                      [type]="'combo'"
+                      [cdata]="commitFrequencyDeveloperDataSets"
+                      [coptions]="developChartptions"
+                      [lcolors]="chartColorsForDeveloper"
+                      [height]="365"
+                    >
+                    </app-kd-line-chart>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ng-container>
+          <!-- Treemap for selected developer -->
+          <ng-container *ngSwitchCase="'Treemap'">
+            <kyn-loader-inline
+              *ngIf="treemapDatasetsLoading | async; else commitChartContainer"
+              status="active"
+              class="spinner"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+            <ng-template #commitChartContainer>
+              <ng-container
+                *ngIf="
+                  datasets && datasets[0].tree.length > 0;
+                  else noDataFoundContainer
+                "
+              >
+                <div class="chart_container">
+                  <div class="commit_frequency_avg_commits">
+                    <div style="color: #6d6d6d">
+                      {{ "developmentMetrics.avgCommits" | translate }}
+                    </div>
+                    <div class="kd-type--headline-08" style="font-size: 20px">
+                      {{ averageDeveloperCommitFrequency }}
+                    </div>
+                    <kd-chart
+                      *ngIf="
+                        datasets && datasets.length > 0;
+                        else noDataFoundContainer
+                      "
+                      type="treemap"
+                      [datasets]="datasets"
+                      [options]="toptions"
+                      noBorder="true"
+                      [height]="340"
+                      hideCaptions="true"
+                      hideControls="true"
+                    >
+                    </kd-chart>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ng-container>
+          <!-- Default chart selection -->
+          <ng-container *ngSwitchDefault>
+            <div class="chart">
+              <kyn-loader-inline
+                *ngIf="commitsChartLoading$ | async; else commitChartContainer"
+                status="active"
+                class="spinner"
+              >
+                {{ "loading" | translate }}
+              </kyn-loader-inline>
+            </div>
+            <ng-template #commitChartContainer>
+              <ng-container
+                *ngIf="
+                  commitFrequencyDataSets && commitFrequencyDataSets.length > 0;
+                  else noDataFoundContainer
+                "
+              >
+                <div class="chart_container">
+                  <div class="commit_frequency_avg_commits">
+                    <div style="color: #6d6d6d">
+                      {{ "developmentMetrics.avgCommits" | translate }}
+                    </div>
+                    <div class="kd-type--headline-08" style="font-size: 20px">
+                      {{ averageCommitFrequency }}
+                    </div>
+                    <app-kd-line-chart
+                      *ngIf="
+                        commitFrequencyDataSets &&
+                          commitFrequencyDataSets.length > 0;
+                        else noDataFoundContainer
+                      "
+                      class="commit_frequency_data"
+                      [cdata]="commitFrequencyDataSets"
+                      [coptions]="options"
+                      [type]="'combo'"
+                      [lcolors]="chartColors"
+                      [height]="365"
+                    >
+                    </app-kd-line-chart>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ng-container>
+        </div>
+        <ng-template #noDataFoundContainer>
+          <div class="k-empty-state--pTop centered-content">
+            <app-empty-state
+              [hasKDSEnabled]="true"
+              [body]="noDataTitle"
+              [subContent]="noDataSubTitle"
+            >
+            </app-empty-state>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    <!-- PR size chart -->
+    <div class="cds--col-md-6 cds--col-sm-6 cds--col-lg-6">
+      <div class="kd-elevation--level-1" id="pr_size_chart">
+        <div
+          class="kd-grid__col--lg-12 kd-grid__col--md-8 kd-grid__col--sm-8 nav-icon"
+        >
+          <div class="title-button-container">
+            <h4 class="kd-type--body-02 kd-type--weight-medium">
+              {{ "developmentMetrics.PRsize" | translate }}
+              <kyn-tooltip
+                class="help-icon-tooltip"
+                anchorPosition="center"
+                direction="right"
+                assistiveText=""
+              >
+                <div slot="anchor">
+                  <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
+                </div>
+                {{ "developmentMetrics.prSizeHelpIcon" | translate }}
+              </kyn-tooltip>
+            </h4>
+            <kyn-dropdown
+              class="pr_size_dropdown"
+              id="pr_size_dropdown"
+              size="sm"
+            >
+              <ng-container *ngFor="let item of chartTypesForPrSize">
+                <kyn-dropdown-option
+                  [value]="item.value"
+                  (on-click)="onPrSizeDropdownChangeSelection($event)"
+                  [id]="item.id"
+                  [selected]="item.selected"
+                >
+                  {{ item.content | translate }}
+                </kyn-dropdown-option>
+              </ng-container>
+            </kyn-dropdown>
+            <kd-button
+              *ngIf="showCommitFrequencyViewDetailsIcon"
+              iconposition="center"
+              kind="tertiary"
+              type="button"
+              size="small"
+              (on-click)="openPRsizeSidePanel($event)"
+            >
+              <kyn-tooltip
+                anchorposition="center"
+                direction="top"
+                assistiveText=""
+              >
+                <div class="button-content" slot="anchor">
+                  <kd-icon
+                    class="button-icon"
+                    slot="icon"
+                    [icon]="arrowUpRight"
+                  ></kd-icon>
+                </div>
+                {{ "developmentMetrics.viewDetails" | translate }}
+              </kyn-tooltip>
+            </kd-button>
+          </div>
+        </div>
+
+        <div
+          class="applicationPrSizeChart"
+          *ngIf="selectedDeveloper.length === 0; else developerPrSizeChart"
+        >
+          <div class="chart">
+            <kyn-loader-inline
+              *ngIf="prSizeChartDataLoading$ | async; else prSizeChartContainer"
+              status="active"
+              class="spinner"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+          </div>
+          <ng-template #prSizeChartContainer>
+            <ng-container
+              *ngIf="
+                prSizeChartData && prSizeChartData.length > 0;
+                else noDataFoundContainer
+              "
+            >
+              <div class="chart_container">
+                <div class="commit_frequency_avg_commits">
+                  <div style="color: #6d6d6d">
+                    {{ "developmentMetrics.avgPRSize" | translate }}
+                  </div>
+                  <div class="kd-type--headline-08" style="font-size: 20px">
+                    {{ avgTimeTakenToMerge }}
+                  </div>
+                  <app-kd-line-chart
+                    *ngIf="
+                      prSizeChartData && prSizeChartData.length > 0;
+                      else noDataFoundContainer
+                    "
+                    [type]="'combo'"
+                    [cdata]="prSizeChartData"
+                    [coptions]="prSizeChartOptions"
+                    [lcolors]="prSizeChartColors"
+                    [height]="365"
+                  >
+                  </app-kd-line-chart>
+                </div>
+              </div>
+            </ng-container>
+          </ng-template>
+        </div>
+
+        <ng-template #developerPrSizeChart>
+          <div class="chart">
+            <kyn-loader-inline
+              *ngIf="
+                prSizeChartDeveloperDataLoading$ | async;
+                else prSizeChartContainer
+              "
+              status="active"
+              class="spinner"
+            >
+              {{ "loading" | translate }}
+            </kyn-loader-inline>
+          </div>
+          <ng-template #prSizeChartContainer>
+            <ng-container
+              *ngIf="
+                developerPrSizeChartData && developerPrSizeChartData.length > 0;
+                else noDataFoundContainer
+              "
+            >
+              <div class="chart_container">
+                <div class="commit_frequency_avg_commits">
+                  <div style="color: #6d6d6d">
+                    {{ "developmentMetrics.avgPRSize" | translate }}
+                  </div>
+                  <div class="kd-type--headline-08" style="font-size: 20px">
+                    {{ averageDeveloperPRSize }}
+                  </div>
+                  <app-kd-line-chart
+                    *ngIf="
+                      developerPrSizeChartData &&
+                        developerPrSizeChartData.length > 0;
+                      else noDataFoundContainer
+                    "
+                    [type]="'combo'"
+                    [cdata]="developerPrSizeChartData"
+                    [coptions]="prSizeDevelopersChartOptions"
+                    [lcolors]="chartColorsForDeveloperPrSize"
+                    [height]="365"
+                  >
+                  </app-kd-line-chart>
+                </div>
+              </div>
+            </ng-container>
+          </ng-template>
+        </ng-template>
+        <ng-template #noDataFoundContainer>
+          <div class="k-empty-state--pTop">
+            <app-empty-state
+              [hasKDSEnabled]="true"
+              [body]="noDataTitle"
+              [subContent]="noDataSubTitle"
+            >
+            </app-empty-state>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- side panel table  -->
+<di-side-panel
+  #sidePanel
+  id="doraDetailSidePanel"
+  class="side_panel"
+  [title]="tableTitle"
+  [subTitle]="tableSubTitle"
+  (panelClosed)="onPanelClosed($event)"
+>
+  <app-commit-frequency-pr-size-details-dashboard
+    *ngIf="onArrowClick"
+    [showCommitFrequencyTable]="showCommitFrequencyTable"
+    [showPRSizeTable]="showPRSizeTable"
+    [showCodeReviewVelocityTable]="showCodeReviewVelocityTable"
+    [PRTimeToMergeTable]="PRTimeToMergeTable"
+    [codeReviewEfficiencyTable]="codeReviewEfficiencyTable"
+    [applications]="selectedApplications"
+    [selectedService]="selectedTechnicalService"
+    [selectedDuration]="selectedDuration"
+    [selectedService]="selectedTechnicalService"
+    [selectedDevelopers]="selectedDeveloper"
+    [previousDays]="previousDays"
+    [isLinesChanged]="isLinesChanged">
+  </app-commit-frequency-pr-size-details-dashboard>
+</di-side-panel>
