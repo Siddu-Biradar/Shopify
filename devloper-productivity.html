@@ -1,0 +1,46 @@
+     <cds-dropdown
+              id="technical_services_skeleton"
+              *ngIf="isAuthorised && developerDropDownLoading"
+              skeleton="true"
+            >
+              <cds-dropdown-list></cds-dropdown-list>
+            </cds-dropdown>
+            <kyn-dropdown
+              *ngIf="isAuthorised && !developerDropDownLoading"
+              class="dropdown input_width"
+              id="developer_dropdown"
+              searchable="true"
+              size="md"
+              [placeholder]="'developmentMetrics.selectDevelopers' | translate"
+              filterSearch="true"
+              multiple="true"
+              [disabled]="!developerNamesList?.length"
+              (on-change)="onDeveloperDropdownChanges($event)"
+              (focusout)="onDeveloperDropdownFocusOut()"
+            >
+              <span slot="label">
+                {{ "developmentMetrics.developer" | translate }}
+                <kyn-tooltip
+                  class="help-icon-tooltip"
+                  anchorPosition="center"
+                  direction="right"
+                  assistiveText=""
+                >
+                  <div slot="anchor">
+                    <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
+                  </div>
+                  {{ "developmentMetrics.developerSelectionMessage" | translate }}
+                </kyn-tooltip>
+              </span>
+              <ng-container *ngFor="let developer of developerNamesList">
+                <kyn-dropdown-option
+                  [value]="developer.id"
+                  [disabled]="
+                    isDeveloperSelectionLimitReached() &&
+                    !isDeveloperSelected(developer.id)
+                  "
+                >
+                  {{ developer.name || "Unknown User" }}
+                </kyn-dropdown-option>
+              </ng-container>
+            </kyn-dropdown>
