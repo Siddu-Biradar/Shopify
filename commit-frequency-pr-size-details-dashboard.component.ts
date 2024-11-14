@@ -8,6 +8,7 @@ import { DoraMetricsService } from '../../pagesV1/dora-metrics/dora-metrics.serv
 import { commitFrequencyDataResponse } from '../commit-frequency-pr-size-widget/commit-frequency-pr-size-widget.model';
 import { CURRENT_TIMEZONE } from '../../util/constants';
 import { QueryParams } from '../../util/query-params.interface';
+
 import { error } from 'console';
 
 @Component({
