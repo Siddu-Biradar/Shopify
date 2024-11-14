@@ -24,10 +24,6 @@ export class CommitFrequencyPrSizeDetailsDashboardComponent implements OnChanges
   @Input() selectedService = '';
   @Input() applications = '';
 
-
-
-  
-
   commitFrequencyDetailsTableFields = commitFrequencyDetailsTableFields;
   PRsizeTableFields = PRsizeTableFields;
   detailsTableTitle: string = TableIDs.developerActivityDetailsPage.developerActivityDetailsTable;
