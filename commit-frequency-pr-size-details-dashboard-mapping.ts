@@ -11,7 +11,6 @@ export const commitFrequencyDetailsTableFields = [
       order: 1,
       freeze: true,
       colWidth: '8%',
-
     },
     {
       fieldName: 'application',
