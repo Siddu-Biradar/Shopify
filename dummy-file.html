@@ -1,0 +1,75 @@
+ngOnChanges(changes: SimpleChanges) {
+    console.log('changes', changes);
+
+    // Update selectedService if it has changed
+    if (changes?.selectedService?.currentValue) {
+      this.selectedService = changes?.selectedService.currentValue;
+    }
+
+    // Update and transform selectedDevelopers if it has changed
+    if (changes?.selectedDevelopers?.currentValue) {
+      this.selectedDevelopers = changes.selectedDevelopers.currentValue;
+      
+      // Transform selectedDevelopers to a comma-separated string of IDs
+      this.developers = this.selectedDevelopers
+        .flatMap(developer => developer.id) // Extract all IDs into a single array
+        .join(','); // Join IDs into a comma-separated string
+    }
+
+    // Prepare the common parameters for changeParams
+    this.durationParams = getDurationParams(this.selectedDuration);
+    const changeParams = {
+      technicalServiceFilterList: Array.isArray(this.selectedService) ? this.selectedService.join(',') : this.selectedService,
+      createdByFilterList: this.developers // Use the transformed comma-separated string
+    };
+
+    // Handle Commit Frequency Table change
+    if (changes.showCommitFrequencyTable && this.showCommitFrequencyTable) {
+      this.commitFrequencyTableData(changeParams);
+    }
+
+    // Handle PR Size Table change
+    if (changes.showPRSizeTable && this.showPRSizeTable) {
+      const params = {
+        ...changeParams,
+        isLinesChanged: this.isLinesChanged,
+      };
+      this.setPRsizeTableSortingTrackerObject();
+      this.setCodeReviewVelocityTableSortingTrackerObject();
+      this.pullRequestSizeViewDetailsData(params);
+    }
+
+    // Prepare parameters for Code Review Velocity Table
+    const changeCRVParams = {
+      technicalServiceFilterList: Array.isArray(this.selectedService) ? this.selectedService.join(',') : this.selectedService,
+      reviewedByFilterList: this.developers
+    };
+
+    // Handle Code Review Velocity Table change
+    if (changes.showCodeReviewVelocityTable && this.showCodeReviewVelocityTable) {
+      this.fetchCodeReviewVelocityTableData(changeCRVParams);
+    }
+
+    // Other specific changes
+    sessionStorage.removeItem("pr-size-activity-details-table");
+    const translatedNoOfFilesChanged = this.translation.translate('developmentMetrics.noOfFilesChange');
+    const translatedNoOfLinesChangedHeaderName = this.translation.translate('developmentMetrics.noOfLinesChanged');
+
+    if (changes?.isLinesChanged?.currentValue) {
+      this.PRsizeTableFields[7].headerName = `${translatedNoOfLinesChangedHeaderName}`;
+      this.PRsizeTableFields[7].headerNameKey = `${translatedNoOfLinesChangedHeaderName}`;
+    } else {
+      this.PRsizeTableFields[7].headerName = `${translatedNoOfFilesChanged}`;
+      this.PRsizeTableFields[7].headerNameKey = `${translatedNoOfFilesChanged}`;
+    }
+
+    // Handle PR Time to Merge Table change
+    if (changes.PRTimeToMergeTable && this.PRTimeToMergeTable) {
+      this.fetchPullRequestTimeToMergeDetailsData(changeParams);
+    }
+
+    // Handle Code Review Efficiency Table change
+    if (changes.codeReviewEfficiencyTable && this.codeReviewEfficiencyTable) {
+      this.fetchCodeReviewEffciencyTableData();
+    }
+  }
