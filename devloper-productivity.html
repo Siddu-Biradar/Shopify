@@ -18,14 +18,7 @@
               (on-change)="onDeveloperDropdownChanges($event)"
               (focusout)="onDeveloperDropdownFocusOut()"
             >
-              <span slot="label">
-                {{ "developmentMetrics.developer" | translate }}
-                <kyn-tooltip
-                  class="help-icon-tooltip"
-                  anchorPosition="center"
-                  direction="right"
-                  assistiveText=""
-                >
+          
                   <div slot="anchor">
                     <kd-icon slot="anchor" [icon]="infoIcon"></kd-icon>
                   </div>
